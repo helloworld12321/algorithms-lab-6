@@ -109,7 +109,7 @@ public class Group7 {
             } else {
                 lookingForAPrime:
                 for (long candidate = prime + 2L; true; candidate += 2L) {
-                    for (long i = 3L; i < Math.sqrt(prime); i += 2L) {
+                    for (long i = 3L; i <= Math.sqrt(candidate); i += 2L) {
                         if (candidate % i == 0L) {
                             continue lookingForAPrime;
                         }
