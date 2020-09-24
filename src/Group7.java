@@ -11,7 +11,7 @@ import java.util.Scanner;
 import java.util.List;
 import java.math.BigInteger;
 
-public class Group0 {
+public class Group7 {
     public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
         // testing the comparator:
 		Data.test_Data(); // This MUST be commented out for your submission to the competition!
