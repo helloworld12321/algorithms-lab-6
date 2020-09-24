@@ -14,7 +14,7 @@ import java.math.BigInteger;
 public class Group7 {
     public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
         // testing the comparator:
-		Data.test_Data(); // This MUST be commented out for your submission to the competition!
+        Data.test_Data(); // This MUST be commented out for your submission to the competition!
 
         if (args.length < 2) {
             System.out.println("Please run with two command line arguments: input and output file names");
@@ -82,9 +82,7 @@ public class Group7 {
 
             // Oh, it's not that bad... yes, it does the wrong thing for
             // non-lowercase-ascii letters, but that's a bounds-checking
-            // problem, not a unicode problem.
-            // Also, type-casting turns it into a unicode code point, not an
-            // ascii value ;)
+            // problem, not a unicode problem. ;)
             return ch - 'a' + 1;
             // Warning:  this will work with non-lower-case ascii characters too.
         }
@@ -113,7 +111,8 @@ public class Group7 {
                 // longs.
                 lookingForAnIntPrime:
                 for (int candidate = (int)prime + 2; candidate > 0; candidate += 2) {
-                    for (int i = 3; i <= Math.sqrt(candidate); i += 2) {
+                    int maxPossibleDivisor = (int)Math.sqrt(candidate);
+                    for (int i = 3; i <= maxPossibleDivisor; i += 2) {
                         if (candidate % i == 0) {
                             continue lookingForAnIntPrime;
                         }
@@ -126,7 +125,8 @@ public class Group7 {
                 // Note that Integer.MAX_VALUE is odd.
                 lookingForALongPrime:
                 for (long candidate = Integer.MAX_VALUE; true; candidate += 2L) {
-                    for (long i = 3L; i <= Math.sqrt(candidate); i += 2L) {
+                    long maxPossibleDivisor = (long)Math.sqrt(candidate);
+                    for (long i = 3L; i <= maxPossibleDivisor; i += 2L) {
                         if (candidate % i == 0L) {
                             continue lookingForALongPrime;
                         }
@@ -137,7 +137,8 @@ public class Group7 {
             } else {
                 lookingForAPrime:
                 for (long candidate = prime + 2L; true; candidate += 2L) {
-                    for (long i = 3L; i <= Math.sqrt(candidate); i += 2L) {
+                    long maxPossibleDivisor = (long)Math.sqrt(candidate);
+                    for (long i = 3L; i <= maxPossibleDivisor; i += 2L) {
                         if (candidate % i == 0L) {
                             continue lookingForAPrime;
                         }
