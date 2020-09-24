@@ -14,7 +14,7 @@ import java.math.BigInteger;
 public class Group7 {
     public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
         // testing the comparator:
-        Data.test_Data(); // This MUST be commented out for your submission to the competition!
+        // Data.test_Data(); // This MUST be commented out for your submission to the competition!
 
         if (args.length < 2) {
             System.out.println("Please run with two command line arguments: input and output file names");
@@ -88,12 +88,12 @@ public class Group7 {
         }
 
         public long gematrify(String str){
-            char[] ch=str.toCharArray();
             long gematria = 0;
-            long multiplier=1;
-            for(int i = str.length()-1; i>=0; i--){ //Work from the right to the left
-                gematria += toVal(ch[i])*multiplier;
-                multiplier = 2*multiplier;
+            long multiplier = 1;
+            for (int i = str.length()-1; i>=0; i--) {
+                // Work from the right to the left
+                gematria += toVal(str.charAt(i)) * multiplier;
+                multiplier *= 2;
             }
             return gematria;
         }
