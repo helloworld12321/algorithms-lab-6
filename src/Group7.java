@@ -106,6 +106,34 @@ public class Group7 {
         long nextPrime(long prime) {
             if (prime == 2L) {
                 return 3L;
+            } else if (prime <= Integer.MAX_VALUE) {
+                // Don't do arithmetic with longs if we can get away with it;
+                // that's *much* slower than just working with ints.
+                // Wait until we get an overflow before start working with
+                // longs.
+                lookingForAnIntPrime:
+                for (int candidate = (int)prime + 2; candidate > 0; candidate += 2) {
+                    for (int i = 3; i <= Math.sqrt(candidate); i += 2) {
+                        if (candidate % i == 0) {
+                            continue lookingForAnIntPrime;
+                        }
+                    }
+                    // If we didn't find any divisors
+                    return candidate;
+                }
+
+                // If we didn't find a prime in the ints, move on to the longs.
+                // Note that Integer.MAX_VALUE is odd.
+                lookingForALongPrime:
+                for (long candidate = Integer.MAX_VALUE; true; candidate += 2L) {
+                    for (long i = 3L; i <= Math.sqrt(candidate); i += 2L) {
+                        if (candidate % i == 0L) {
+                            continue lookingForALongPrime;
+                        }
+                    }
+                    // If we didn't find any divisors
+                    return candidate;
+                }
             } else {
                 lookingForAPrime:
                 for (long candidate = prime + 2L; true; candidate += 2L) {
