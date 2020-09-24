@@ -47,23 +47,11 @@ public class Group7 {
     // You would need to provide your own function that prints your sorted array to
     // a file in the exact same format that my program outputs
     private static Data[] sort(String[] toSort) {
-        // The comparator remembers primes (locally to the sort method.)
-        ArrayList<Long> primes = new ArrayList<>();
-        // Start the array off with a few values computed ahead of time.
-        primes.add(2L);
-        primes.add(3L);
-        primes.add(5L);
-        primes.add(7L);
-        primes.add(11L);
-        primes.add(13L);
-        primes.add(17L);
-        primes.add(19L);
-
         Data[] toSortData = new Data[toSort.length];
         for (int i = 0; i < toSort.length; ++i) {
             toSortData[i] = new Data(toSort[i]);
         }
-        Arrays.sort(toSortData, new GematriaComparator(primes));
+        Arrays.sort(toSortData, new GematriaComparator());
         return toSortData;
     }
 
@@ -88,16 +76,18 @@ public class Group7 {
     }
 
     private static class GematriaComparator implements Comparator<Data> {
+        public long toVal(char ch){
+            // This function is an ancient evil that has no place in a unicode-based world :(
+            // type-casting a ch to (int) turns it into an ascii value
 
-        ArrayList<Long> knownPrimes;
-
-        public GematriaComparator(ArrayList<Long> knownPrimes) {
-            this.knownPrimes = knownPrimes;
+            // Oh, it's not that bad... yes, it does the wrong thing for
+            // non-lowercase-ascii letters, but that's a bounds-checking
+            // problem, not a unicode problem.
+            // Also, type-casting turns it into a unicode code point, not an
+            // ascii value ;)
+            return ch - 'a' + 1;
+            // Warning:  this will work with non-lower-case ascii characters too.
         }
-
-        public long toVal(char ch){ // This function is an ancient evil that has no place in a unicode-based world :(
-            return (int) ch - (int) 'a' + 1;    //type-casting a ch to (int) turns it into an ascii value
-        } //Warning:  this will work with non-lower-case ascii characters too.
 
         public long gematrify(String str){
             char[] ch=str.toCharArray();
@@ -110,29 +100,23 @@ public class Group7 {
             return gematria;
         }
 
-        long findNextPrime(){
-            lookingForAPrime:
-            for (long m = this.knownPrimes.get(this.knownPrimes.size() - 1); true; m += 2) {
-                for (long prime : knownPrimes) {
-                    if (m % prime == 0) {
-                        continue lookingForAPrime;
-                    }
-                }
-                // If we didn't find any divisors
-                this.knownPrimes.add(m);
-                return m;
-            }
-        }
-
         /**
-         * Return the next prime given a index from knownPrimes
-         * If no such prime exists in knownPrimes, finds a new one
+         * Return the next prime number larger than `prime`.
          */
-        long nextPrime(int index) {
-            if (index + 1 < this.knownPrimes.size()) {
-                return this.knownPrimes.get(index + 1);
+        long nextPrime(long prime) {
+            if (prime == 2L) {
+                return 3L;
             } else {
-                return findNextPrime();
+                lookingForAPrime:
+                for (long candidate = prime + 2L; true; candidate += 2L) {
+                    for (long i = 3L; i < Math.sqrt(prime); i += 2L) {
+                        if (candidate % i == 0L) {
+                            continue lookingForAPrime;
+                        }
+                    }
+                    // If we didn't find any divisors
+                    return candidate;
+                }
             }
         }
 
@@ -150,8 +134,7 @@ public class Group7 {
                 return s1.word.compareTo(s2.word);
             }
 
-            int primeIndex = 0;
-            long prime = this.knownPrimes.get(primeIndex);
+            long prime = 2;
             boolean done = false;
             boolean d1 = false;
             boolean d2 = false;
@@ -165,27 +148,21 @@ public class Group7 {
                 // We know that g1 AND g2 have unprocessed divisors
                 d1 = (g1 % prime == 0); //d1 is a BOOLEAN value
                 d2 = (g2 % prime == 0); //d2 is a BOOLEAN VALUE
+
                 if (!d1 && !d2) {
                     // Neither are divisible, move to next prime.
-                    prime = nextPrime(primeIndex);
-                    primeIndex++;
-                    continue;
-                }
-
-                if (d1 && d2) {
+                    prime = nextPrime(prime);
+                } else if (d1 && d2) {
                     // Both are divisible. Remove the divisor and continue.
                     g1 /= prime;
                     g2 /= prime;
-                    continue;
-                }
-
-                if (d1) {
+                } else if (d1) {
                     return -1;
                 } else {
                     return 1;
                 }
             }
-            System.out.println("WARNING... you should't be here!");
+            System.err.println("WARNING... you should't be here!");
             return(0); //This should NEVER happen
         }
     }
@@ -200,20 +177,9 @@ public class Group7 {
         }
 
         public static void print_test(String s1,String s2){
-            ArrayList<Long> primes = new ArrayList<>();
-            // Start the array off with a few values computed ahead of time.
-            primes.add(2L);
-            primes.add(3L);
-            primes.add(5L);
-            primes.add(7L);
-            primes.add(11L);
-            primes.add(13L);
-            primes.add(17L);
-            primes.add(19L);
-
             Data testItem1 = new Data(s1);
             Data testItem2 = new Data(s2);
-            GematriaComparator comparator = new GematriaComparator(primes);
+            GematriaComparator comparator = new GematriaComparator();
 
             System.out.println("Defining: s1 = "+s1+" and s2 = "+s2);
             System.out.println("\tg1 = "+comparator.gematrify(s1)+ " and g2 = "+comparator.gematrify(s2));
