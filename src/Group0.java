@@ -47,11 +47,23 @@ public class Group0 {
     // You would need to provide your own function that prints your sorted array to
     // a file in the exact same format that my program outputs
     private static Data[] sort(String[] toSort) {
+        // The comparator remembers primes (locally to the sort method.)
+        ArrayList<Long> primes = new ArrayList<>();
+        // Start the array off with a few values computed ahead of time.
+        primes.add(2L);
+        primes.add(3L);
+        primes.add(5L);
+        primes.add(7L);
+        primes.add(11L);
+        primes.add(13L);
+        primes.add(17L);
+        primes.add(19L);
+
         Data[] toSortData = new Data[toSort.length];
         for (int i = 0; i < toSort.length; ++i) {
             toSortData[i] = new Data(toSort[i]);
         }
-        Arrays.sort(toSortData, new GematriaComparator());
+        Arrays.sort(toSortData, new GematriaComparator(primes));
         return toSortData;
     }
 
@@ -76,6 +88,13 @@ public class Group0 {
     }
 
     private static class GematriaComparator implements Comparator<Data> {
+
+        ArrayList<Long> knownPrimes;
+
+        public GematriaComparator(ArrayList<Long> knownPrimes) {
+            this.knownPrimes = knownPrimes;
+        }
+
         public long toVal(char ch){ // This function is an ancient evil that has no place in a unicode-based world :(
             return (int) ch - (int) 'a' + 1;    //type-casting a ch to (int) turns it into an ascii value
         } //Warning:  this will work with non-lower-case ascii characters too.
@@ -90,47 +109,88 @@ public class Group0 {
             }
             return gematria;
         }
-        boolean isPrime(long n){
-            for(int i=2; i<=Math.sqrt(n); i++){
-                if(n%i==0){return false;}
+
+        long findNextPrime(){
+            lookingForAPrime:
+            for (long m = this.knownPrimes.get(this.knownPrimes.size() - 1); true; m += 2) {
+                for (long prime : knownPrimes) {
+                    if (m % prime == 0) {
+                        continue lookingForAPrime;
+                    }
+                }
+                // If we didn't find any divisors
+                this.knownPrimes.add(m);
+                return m;
             }
-            return true;
         }
-        long nextPrime(long n){
-            long m=n;
-            while(true){ // In a worst-case scenario we'll run out of values for m... if we don't throw an exception we'll wrap around to the negatives.  We'll find a prime eventually
-                m=m+1;
-                if(isPrime(m))return(m);}
+
+        /**
+         * Return the next prime given a index from knownPrimes
+         * If no such prime exists in knownPrimes, finds a new one
+         */
+        long nextPrime(int index) {
+            if (index + 1 < this.knownPrimes.size()) {
+                return this.knownPrimes.get(index + 1);
+            } else {
+                return findNextPrime();
             }
         }
+
         @Override
         public int compare(Data s1, Data s2) {
+            if (s1.word.equals(s2.word)) {
+                return 0;
+            }
+
             long g1 = gematrify(s1.word);
             long g2 = gematrify(s2.word);
 
-            if(g1==g2){return s1.word.compareTo(s2.word);} // in case of tie, compare lexicographically
-                long p = 2;
-                boolean done = false;
-                boolean d1 = false;
-                boolean d2 = false;
-                while(!done) { //Since g1 != g2 as we strip divisors we either find a smaller one, or one of the two reaches 1 first
-                    if(g1==1){return(-1);}
-                    if(g2==1){return(1);}
-                    // We know that g1 AND g2 have unprocessed divisors
-                    d1 = (g1%p==0); //d1 is a BOOLEAN value
-                    d2 = (g2%p==0); //d2 is a BOOLEAN VALUE
-                    if((!d1) && (!d2)){p=nextPrime(p);continue;}//Neither are divisible, move to next prime
-                    if(d1 && d2){ //both are divisible.  Remove the divisor and continue
-                        g1=g1/p;
-                        g2=g2/p;
-                        continue;
-                    }
-                    if(d1){return -1;} else {return 1;}
+            // in case of tie, compare lexicographically
+            if (g1 == g2) {
+                return s1.word.compareTo(s2.word);
+            }
+
+            int primeIndex = 0;
+            long prime = this.knownPrimes.get(primeIndex);
+            boolean done = false;
+            boolean d1 = false;
+            boolean d2 = false;
+            while (!done) { //Since g1 != g2 as we strip divisors we either find a smaller one, or one of the two reaches 1 first
+                if (g1 == 1) {
+                    return -1;
                 }
-                System.out.println("WARNING... you should't be here!");
-                return(0); //This should NEVER happen
-			}
-		}
+                if (g2==1) {
+                    return 1;
+                }
+                // We know that g1 AND g2 have unprocessed divisors
+                d1 = (g1 % prime == 0); //d1 is a BOOLEAN value
+                d2 = (g2 % prime == 0); //d2 is a BOOLEAN VALUE
+                if (!d1 && !d2) {
+                    // Neither are divisible, move to next prime.
+                    prime = nextPrime(primeIndex);
+                    primeIndex++;
+                    continue;
+                }
+
+                if (d1 && d2) {
+                    // Both are divisible. Remove the divisor and continue.
+                    g1 /= prime;
+                    g2 /= prime;
+                    continue;
+                }
+
+                if (d1) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+            System.out.println("WARNING... you should't be here!");
+            return(0); //This should NEVER happen
+        }
+    }
+
+
 
     private static class Data {
         public String word;     // The original string-- useful to outputting at the end.
@@ -138,10 +198,22 @@ public class Group0 {
         public Data(String inWord) {
             word = new String(inWord); // Make a copy of the string
         }
+
         public static void print_test(String s1,String s2){
+            ArrayList<Long> primes = new ArrayList<>();
+            // Start the array off with a few values computed ahead of time.
+            primes.add(2L);
+            primes.add(3L);
+            primes.add(5L);
+            primes.add(7L);
+            primes.add(11L);
+            primes.add(13L);
+            primes.add(17L);
+            primes.add(19L);
+
             Data testItem1 = new Data(s1);
             Data testItem2 = new Data(s2);
-            GematriaComparator comparator = new GematriaComparator();
+            GematriaComparator comparator = new GematriaComparator(primes);
 
             System.out.println("Defining: s1 = "+s1+" and s2 = "+s2);
             System.out.println("\tg1 = "+comparator.gematrify(s1)+ " and g2 = "+comparator.gematrify(s2));
