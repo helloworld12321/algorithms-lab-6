@@ -51,8 +51,81 @@ public class Group7 {
         for (int i = 0; i < toSort.length; ++i) {
             toSortData[i] = new Data(toSort[i]);
         }
-        Arrays.sort(toSortData, new GematriaComparator());
+        threeWayQuicksort(toSortData, 0, toSortData.length - 1, new GematriaComparator());
         return toSortData;
+    }
+
+    /**
+     * A quicksort with a three-way partition. (One that divides the array
+     * elements into sections greater-than, equal, and less than the pivot.)
+     *
+     * Based on the pseudocode from
+     * https://www.toptal.com/developers/sorting-algorithms/quick-sort-3-way
+     *
+     * Specifically, this method sorts the subsection of the array `toSort`
+     * between the indices `start` and `stop`, inclusive, using the comparison
+     * function defined by `comparator`.
+     */
+    private static void threeWayQuicksort(
+            Data[] toSort,
+            int start,
+            int stop,
+            Comparator<Data> comparator) {
+        if (start >= stop) {
+            return;
+        }
+
+        // Don't bother choosing a random pivot, since we know that the array
+        // will already be pretty well randomized.
+        Data pivot = toSort[stop];
+
+        int i = start;
+        int k = start;
+        int p = stop;
+        // Partition the array into three sections.
+        // i is just a loop variable; it marks how much of the array we've
+        // read. (During the loop, the range a[i..p-1] hasn't been sorted yet.)
+
+        // Then, at the end of the loop:
+        // a[start..k-1] will contain all the elements less than the pivot;
+        // a[k..p-1], all the elements greater than the pivot; and
+        // a[p..stop], all the elements equal to the pivot.
+        // (Then, at the end, we'll swap the locations of the "greater than"
+        // and the "equal" sections, so that they're in the right order.)
+        while(i < p) {
+            int comparison = comparator.compare(toSort[i], pivot);
+            if (comparison < 0) {
+                // Put toSort[i] in the less-than section.
+                Data temp = toSort[i];
+                toSort[i] = toSort[k];
+                toSort[k] = temp;
+                i++;
+                k++;
+            } else if (comparison == 0) {
+                // Put toSort[i] in the equals section.
+                p--;
+                Data temp = toSort[i];
+                toSort[i] = toSort[p];
+                toSort[p] = temp;
+            } else {
+                // Put toSort[i] in the greater-than section. (Which we can do
+                // by just making the greater-than section larger.)
+                i++;
+            }
+        }
+
+        // Check whether the greater-than section or the equal-to section
+        // is smaller. (We don't want to do more swaps than we have to.)
+        int numberToSwap = Math.min(p-k, stop-p+1);
+
+        for (int j = 0; j < numberToSwap; j++) {
+            Data temp = toSort[k + j];
+            toSort[k + j] = toSort[stop - numberToSwap + j + 1];
+            toSort[stop - numberToSwap + j + 1] = temp;
+        }
+
+        threeWayQuicksort(toSort, start, k - 1, comparator);
+        threeWayQuicksort(toSort, k + (stop - p + 1), stop, comparator);
     }
 
     private static void printArray(String[] Arr, int n) {
