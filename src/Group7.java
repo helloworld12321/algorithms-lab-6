@@ -56,6 +56,12 @@ public class Group7 {
     }
 
     /**
+     * If an array is this size or smaller, we'll use insertion sort on it,
+     * rather than quicksort.
+     */
+    private static final int INSERTION_SWAP_LENGTH = 6;
+
+    /**
      * A quicksort with a three-way partition. (One that divides the array
      * elements into sections greater-than, equal, and less than the pivot.)
      *
@@ -71,7 +77,8 @@ public class Group7 {
             int start,
             int stop,
             Comparator<Data> comparator) {
-        if (start >= stop) {
+        if (stop - start + 1 <= INSERTION_SWAP_LENGTH) {
+            insertionSort(toSort, start, stop, comparator);
             return;
         }
 
@@ -126,6 +133,27 @@ public class Group7 {
 
         threeWayQuicksort(toSort, start, k - 1, comparator);
         threeWayQuicksort(toSort, k + (stop - p + 1), stop, comparator);
+
+    }
+
+    /**
+     * Sort the sub-range of an array between `start` and `stop`, inclusive,
+     * using an insertion sort.
+     */
+    private static void insertionSort(
+            Data[] toSort,
+            int start,
+            int stop,
+            Comparator<Data> comparator) {
+        for (int j = start + 1; j <= stop; j++) {
+            Data key = toSort[j];
+            int i = j - 1;
+            while (i >= start && comparator.compare(toSort[i], key) > 0) {
+                toSort[i + 1] = toSort[i];
+                i--;
+            }
+            toSort[i + 1] = key;
+        }
     }
 
     private static void printArray(String[] Arr, int n) {
