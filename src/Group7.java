@@ -201,11 +201,11 @@ public class Group7 {
 
         /**
          * Return the next prime number larger than `prime`.
+         *
+         * As a precondition, `prime` should be larger than two.
          */
         long nextPrime(long prime) {
-            if (prime == 2L) {
-                return 3L;
-            } else if (prime < Integer.MAX_VALUE) {
+            if (prime < Integer.MAX_VALUE) {
                 // Don't do arithmetic with longs if we can get away with it;
                 // that's *much* slower than just working with ints.
 
