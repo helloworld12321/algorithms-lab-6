@@ -59,7 +59,7 @@ public class Group7 {
      * If an array is this size or smaller, we'll use insertion sort on it,
      * rather than quicksort.
      */
-    private static final int INSERTION_SWAP_LENGTH = 6;
+    private static final int INSERTION_SWAP_LENGTH = 5;
 
     /**
      * A quicksort with a three-way partition. (One that divides the array
