@@ -12,10 +12,7 @@ import java.util.List;
 import java.math.BigInteger;
 
 public class Group7 {
-    public static void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
-        // testing the comparator:
-        // Data.test_Data(); // This MUST be commented out for your submission to the competition!
-
+    public static final void main(String[] args) throws InterruptedException, FileNotFoundException, IOException {
         if (args.length < 2) {
             System.out.println("Please run with two command line arguments: input and output file names");
             System.exit(0);
@@ -46,7 +43,7 @@ public class Group7 {
     // Note: you may change the return type of the method.
     // You would need to provide your own function that prints your sorted array to
     // a file in the exact same format that my program outputs
-    private static Data[] sort(String[] toSort) {
+    private static final Data[] sort(String[] toSort) {
         Data[] toSortData = new Data[toSort.length];
         for (int i = 0; i < toSort.length; ++i) {
             toSortData[i] = new Data(toSort[i]);
@@ -72,7 +69,7 @@ public class Group7 {
      * between the indices `start` and `stop`, inclusive, using the comparison
      * function defined by `comparator`.
      */
-    private static void threeWayQuicksort(
+    private static final void threeWayQuicksort(
             Data[] toSort,
             int start,
             int stop,
@@ -140,7 +137,7 @@ public class Group7 {
      * Sort the sub-range of an array between `start` and `stop`, inclusive,
      * using an insertion sort.
      */
-    private static void insertionSort(
+    private static final void insertionSort(
             Data[] toSort,
             int start,
             int stop,
@@ -177,34 +174,12 @@ public class Group7 {
     }
 
     private static class GematriaComparator implements Comparator<Data> {
-        public long toVal(char ch){
-            // This function is an ancient evil that has no place in a unicode-based world :(
-            // type-casting a ch to (int) turns it into an ascii value
-
-            // Oh, it's not that bad... yes, it does the wrong thing for
-            // non-lowercase-ascii letters, but that's a bounds-checking
-            // problem, not a unicode problem. ;)
-            return ch - 'a' + 1;
-            // Warning:  this will work with non-lower-case ascii characters too.
-        }
-
-        public long gematrify(String str){
-            long gematria = 0;
-            long multiplier = 1;
-            for (int i = str.length()-1; i>=0; i--) {
-                // Work from the right to the left
-                gematria += toVal(str.charAt(i)) * multiplier;
-                multiplier *= 2;
-            }
-            return gematria;
-        }
-
         /**
          * Return the next prime number larger than `prime`.
          *
          * As a precondition, `prime` should be larger than two.
          */
-        long nextPrime(long prime) {
+        private final long nextPrime(long prime) {
             if (prime < Integer.MAX_VALUE) {
                 // Don't do arithmetic with longs if we can get away with it;
                 // that's *much* slower than just working with ints.
@@ -240,9 +215,9 @@ public class Group7 {
         }
 
         @Override
-        public int compare(Data s1, Data s2) {
-            long g1 = gematrify(s1.word);
-            long g2 = gematrify(s2.word);
+        public final int compare(Data s1, Data s2) {
+            long g1 = s1.gematria;
+            long g2 = s2.gematria;
 
             // in case of tie, compare lexicographically
             if (g1 == g2) {
@@ -310,33 +285,23 @@ public class Group7 {
     }
 
     private static class Data {
+        private static final long gematrify(String str){
+            long gematria = 0;
+            long multiplier = 1;
+            for (int i = str.length()-1; i>=0; i--) {
+                // Work from the right to the left
+                gematria += (str.charAt(i) - 'a' + 1) * multiplier;
+                multiplier *= 2;
+            }
+            return gematria;
+        }
+
         public String word;     // The original string-- useful to outputting at the end.
+        public long gematria;
 
         public Data(String inWord) {
-            word = new String(inWord); // Make a copy of the string
-        }
-
-        public static void print_test(String s1,String s2){
-            Data testItem1 = new Data(s1);
-            Data testItem2 = new Data(s2);
-            GematriaComparator comparator = new GematriaComparator();
-
-            System.out.println("Defining: s1 = "+s1+" and s2 = "+s2);
-            System.out.println("\tg1 = "+comparator.gematrify(s1)+ " and g2 = "+comparator.gematrify(s2));
-            System.out.println("Compare: "+s1+" to "+s2+": ");
-            System.out.println("Result="+comparator.compare(testItem1,testItem2));
-            System.out.println("Compare: "+s2+" to "+s1+": ");
-            System.out.println("Result="+comparator.compare(testItem2,testItem1));
-            System.out.println("---");
-        }
-
-        public static void test_Data() {
-            String s1,s2;
-
-            print_test("cat","cat");      // Two of the same thing
-            print_test("cat","dog");      // Two different
-            print_test("cat","doh");      // both with even gematria
-            System.out.println("---");
+            this.word = inWord;
+            this.gematria = gematrify(inWord);
         }
     }
 
