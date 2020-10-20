@@ -66,7 +66,7 @@ public class Group7 {
      * elements into sections greater-than, equal, and less than the pivot.)
      *
      * Based on the pseudocode from
-     * https://www.toptal.com/developers/sorting-algorithms/quick-sort-3-way
+     * https://www.cs.princeton.edu/~rs/talks/QuicksortIsOptimal.pdf
      *
      * Specifically, this method sorts the subsection of the array `toSort`
      * between the indices `start` and `stop`, inclusive, using the comparison
@@ -86,54 +86,84 @@ public class Group7 {
         // will already be pretty well randomized.
         Data pivot = toSort[stop];
 
-        int i = start;
-        int k = start;
-        int p = stop;
-        // Partition the array into three sections.
-        // i is just a loop variable; it marks how much of the array we've
-        // read. (During the loop, the range a[i..p-1] hasn't been sorted yet.)
+        int p = start - 1;
+        int i = start - 1;
+        int j = stop;
+        int q = stop;
 
-        // Then, at the end of the loop:
-        // a[start..k-1] will contain all the elements less than the pivot;
-        // a[k..p-1], all the elements greater than the pivot; and
-        // a[p..stop], all the elements equal to the pivot.
-        // (Then, at the end, we'll swap the locations of the "greater than"
-        // and the "equal" sections, so that they're in the right order.)
-        while(i < p) {
-            int comparison = comparator.compare(toSort[i], pivot);
-            if (comparison < 0) {
-                // Put toSort[i] in the less-than section.
-                Data temp = toSort[i];
-                toSort[i] = toSort[k];
-                toSort[k] = temp;
+        Data tmp;
+
+        // This loop partitions the array into five sections:
+        // start {==} p {<} i {unsorted} j {>} q {==} stop
+        // The loop ends when the unsorted section is empty.
+        // (Then, we'll move the two "==" sections to the middle.)
+        while (true) {
+            // Skip all the "<" elements (they're already in the right place).
+            do {
                 i++;
-                k++;
-            } else if (comparison == 0) {
-                // Put toSort[i] in the equals section.
-                p--;
-                Data temp = toSort[i];
-                toSort[i] = toSort[p];
-                toSort[p] = temp;
-            } else {
-                // Put toSort[i] in the greater-than section. (Which we can do
-                // by just making the greater-than section larger.)
-                i++;
+            } while (comparator.compare(toSort[i], pivot) < 0);
+
+            // Similarly, skip all the ">" elements (they're already in the
+            // right place).
+            do {
+                j--;
+                if (j == start) {
+                    break;
+                }
+            } while (comparator.compare(pivot, toSort[j]) < 0);
+
+            if (i >= j) {
+                break;
+            }
+
+            tmp = toSort[i];
+            toSort[i] = toSort[j];
+            toSort[j] = tmp;
+
+            // Move any "==" element to the far left.
+            if (toSort[i].word.equals(pivot.word)) {
+                p++;
+                tmp = toSort[p];
+                toSort[p] = toSort[i];
+                toSort[i] = tmp;
+            }
+
+            // Move any "==" element to the far right.
+            if (toSort[j].word.equals(pivot.word)) {
+                q--;
+                tmp = toSort[j];
+                toSort[j] = toSort[q];
+                toSort[q] = tmp;
             }
         }
 
-        // Check whether the greater-than section or the equal-to section
-        // is smaller. (We don't want to do more swaps than we have to.)
-        int numberToSwap = Math.min(p-k, stop-p+1);
+        // Put the pivot in the middle
+        tmp = toSort[i];
+        toSort[i] = toSort[stop];
+        toSort[stop] = tmp;
 
-        for (int j = 0; j < numberToSwap; j++) {
-            Data temp = toSort[k + j];
-            toSort[k + j] = toSort[stop - numberToSwap + j + 1];
-            toSort[stop - numberToSwap + j + 1] = temp;
+        // j is right below the pivot; i is right above the pivot.
+        j = i - 1;
+        i++;
+
+        // Switch the "==" section on the left with the top part of the
+        // "<" section.
+        for (int k = start; k < p; k++, j--) {
+            tmp = toSort[k];
+            toSort[k] = toSort[j];
+            toSort[j] = tmp;
         }
 
-        threeWayQuicksort(toSort, start, k - 1, comparator);
-        threeWayQuicksort(toSort, k + (stop - p + 1), stop, comparator);
+        // Switch the "==" section on the right with the bottom part of the
+        // ">" section.
+        for (int k = stop - 1; k > q; k--, i++) {
+            tmp = toSort[k];
+            toSort[k] = toSort[i];
+            toSort[i] = tmp;
+        }
 
+        threeWayQuicksort(toSort, start, j, comparator);
+        threeWayQuicksort(toSort, i, stop, comparator);
     }
 
     /**
